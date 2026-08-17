@@ -1,0 +1,364 @@
+/* =============================================================
+ * Matter Design System — Colors & Type
+ * One system, two expressive layers: Waste (green/earth) + Water (blue/cool)
+ *
+ * Load order:
+ *   1. Imports Poppins (primary) + IBM Plex Mono (numerics/code)
+ *   2. :root defines the SHARED Matter tokens
+ *   3. [data-brand="waste"] / [data-brand="water"] override accent tokens
+ *
+ * Usage:
+ *   <html data-brand="waste">   → operational, structured
+ *   <html data-brand="water">   → predictive, intelligent, cool
+ *   (no attribute)              → parent Matter brand
+ * ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* =========================================================
+ * 1. SHARED CORE TOKENS (Matter parent)
+ * ========================================================= */
+:root {
+  /* ---- Brand anchors (always identical across Waste + Water) ---- */
+  --matter-ink:          #0E1A1F;   /* near-black for primary type */
+  --matter-graphite:     #2B3339;   /* headings / strong ink */
+  --matter-slate:        #53565A;   /* Dark Grey from brand guide — body */
+  --matter-steel:        #7A8189;   /* muted body */
+  --matter-mist:         #C3C9CE;   /* borders & dividers */
+  --matter-cloud:        #E6E9EC;   /* hairlines, track fills */
+  --matter-paper:        #F4F5F6;   /* subtle surface */
+  --matter-canvas:       #FAFAF8;   /* app background (warm white) */
+  --matter-white:        #FFFFFF;
+
+  /* ---- Signal colors (shared across domains) ---- */
+  --signal-success:      #2E9D5B;
+  --signal-warning:      #F19E21;   /* Matter Orange from brand guide */
+  --signal-danger:       #D64545;
+  --signal-info:         #3E8DD6;   /* doubles as Water accent */
+
+  /* ---- Waste palette (from Matter Brand Guide p.21) ---- */
+  --waste-primary-50:    #EDF7E9;
+  --waste-primary-100:   #D4ECC9;
+  --waste-primary-200:   #ADDB99;
+  --waste-primary-300:   #84C96A;
+  --waste-primary-400:   #5FB944;
+  --waste-primary-500:   #43B02A;   /* ★ Light Green — primary */
+  --waste-primary-600:   #378E22;
+  --waste-primary-700:   #2B6C1A;
+  --waste-primary-800:   #1F4B12;
+  --waste-primary-900:   #133009;
+
+  --waste-deep-50:       #E7F0EB;
+  --waste-deep-100:      #C4DDCE;
+  --waste-deep-200:      #8FBFA0;
+  --waste-deep-300:      #5CA174;
+  --waste-deep-400:      #377B52;
+  --waste-deep-500:      #205C40;   /* ★ Dark Green — secondary */
+  --waste-deep-600:      #194A33;
+  --waste-deep-700:      #133826;
+  --waste-deep-800:      #0C2519;
+  --waste-deep-900:      #06130C;
+
+  --waste-accent:        #F19E21;   /* ★ Orange — accent / CTAs secondary */
+  --waste-earth:         #A87E4B;   /* supporting, material/logistics */
+
+  /* ---- Water palette (from Matter Water Brand Guide p.21) ---- */
+  --water-primary-50:    #EAF3FC;
+  --water-primary-100:   #CDE1F6;
+  --water-primary-200:   #9BC4EE;
+  --water-primary-300:   #6BA8E4;
+  --water-primary-400:   #4A98DD;
+  --water-primary-500:   #3E8DD6;   /* ★ Light Blue — primary */
+  --water-primary-600:   #2E73B6;
+  --water-primary-700:   #205B93;
+  --water-primary-800:   #154470;
+  --water-primary-900:   #0C2D4C;
+
+  --water-deep-50:       #E4ECF3;
+  --water-deep-100:      #BED1E0;
+  --water-deep-200:      #7FA2C2;
+  --water-deep-300:      #4A7AA5;
+  --water-deep-400:      #285F91;
+  --water-deep-500:      #175787;   /* ★ Dark Blue — secondary */
+  --water-deep-600:      #11466E;
+  --water-deep-700:      #0D3656;
+  --water-deep-800:      #08253C;
+  --water-deep-900:      #041425;
+
+  --water-accent:        #F25B8E;   /* ★ Pink — accent (from guide p.21, partially clipped "F2…") */
+  --water-cyan:           #5EC8D9;  /* supporting — stream / live data */
+
+  /* ---- Default (Matter parent) semantic mapping ---- */
+  --brand-primary:       var(--waste-primary-500);
+  --brand-primary-ink:   #FFFFFF;
+  --brand-secondary:     var(--water-primary-500);
+  --brand-accent:        var(--waste-accent);
+
+  /* ---- Semantic text & surfaces ---- */
+  --fg-1:                var(--matter-ink);      /* primary text */
+  --fg-2:                var(--matter-slate);    /* secondary text */
+  --fg-3:                var(--matter-steel);    /* tertiary / labels */
+  --fg-inverse:          var(--matter-white);
+  --fg-link:             var(--water-primary-600);
+  --fg-link-hover:       var(--water-primary-700);
+
+  --bg-app:              var(--matter-canvas);
+  --bg-surface:          var(--matter-white);
+  --bg-raised:           var(--matter-white);
+  --bg-subtle:           var(--matter-paper);
+  --bg-inverse:          var(--matter-ink);
+
+  --border-subtle:       var(--matter-cloud);
+  --border-default:      var(--matter-mist);
+  --border-strong:       var(--matter-steel);
+
+  /* ---- Type: families ---- */
+  --font-sans:     'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display:  'Poppins', system-ui, sans-serif;
+  --font-mono:     'IBM Plex Mono', ui-monospace, SFMono-Regular, 'Menlo', monospace;
+
+  /* ---- Type: scale (desktop) ---- */
+  --fs-display:    clamp(3rem, calc(4vw + 1rem), 4.75rem); /* @kind font */
+  --fs-h1:         clamp(2.25rem, calc(2.4vw + 1rem), 3.25rem); /* @kind font */
+  --fs-h2:         clamp(1.75rem, calc(1.4vw + 1rem), 2.375rem); /* @kind font */
+  --fs-h3:         1.5rem; /* @kind font */
+  --fs-h4:         1.25rem; /* @kind font */
+  --fs-h5:         1.0625rem; /* @kind font */
+  --fs-h6:         0.9375rem; /* @kind font */
+  --fs-body-lg:    1.125rem; /* @kind font */
+  --fs-body:       1rem; /* @kind font */
+  --fs-body-sm:    0.875rem; /* @kind font */
+  --fs-label:      0.8125rem; /* @kind font */
+  --fs-caption:    0.75rem; /* @kind font */
+
+  /* ---- Type: weights & tracking ---- */
+  --fw-light:      300;         /* @kind font */
+  --fw-regular:    400;         /* @kind font */
+  --fw-medium:     500;         /* @kind font */
+  --fw-semibold:   600;         /* @kind font */
+  --fw-bold:       700;         /* @kind font */
+
+  --lh-tight:      1.08;        /* @kind font */
+  --lh-snug:       1.2;         /* @kind font */
+  --lh-normal:     1.45;        /* @kind font */
+  --lh-relaxed:    1.6;         /* @kind font */
+
+  --ls-display:    -0.02em;     /* @kind font */
+  --ls-heading:    -0.01em;     /* @kind font */
+  --ls-body:       0;           /* @kind font */
+  --ls-caps:       0.08em;      /* @kind font */
+
+  /* ---- Spacing scale (4pt base) ---- */
+  --space-0:       0;
+  --space-1:       4px;
+  --space-2:       8px;
+  --space-3:       12px;
+  --space-4:       16px;
+  --space-5:       20px;
+  --space-6:       24px;
+  --space-7:       32px;
+  --space-8:       40px;
+  --space-9:       48px;
+  --space-10:      64px;
+  --space-11:      80px;
+  --space-12:      96px;
+  --space-13:      128px;
+
+  /* ---- Radius ---- */
+  --radius-xs:     4px;
+  --radius-sm:     6px;
+  --radius-md:     10px;
+  --radius-lg:     14px;
+  --radius-xl:     20px;
+  --radius-2xl:    28px;
+  --radius-pill:   999px;
+
+  /* ---- Shadows (neutral, soft — Matter avoids heavy shadows) ---- */
+  --shadow-xs:     0 1px 2px rgba(14, 26, 31, 0.04);
+  --shadow-sm:     0 1px 2px rgba(14, 26, 31, 0.05), 0 1px 1px rgba(14, 26, 31, 0.03);
+  --shadow-md:     0 4px 10px -2px rgba(14, 26, 31, 0.06), 0 2px 4px -1px rgba(14, 26, 31, 0.04);
+  --shadow-lg:     0 12px 28px -8px rgba(14, 26, 31, 0.10), 0 4px 8px -2px rgba(14, 26, 31, 0.05);
+  --shadow-focus:  0 0 0 3px color-mix(in oklab, var(--brand-primary) 30%, transparent);
+
+  /* ---- Motion ---- */
+  --ease-standard:  cubic-bezier(0.2, 0, 0, 1); /* @kind other */
+  --ease-entrance:  cubic-bezier(0, 0, 0, 1); /* @kind other */
+  --ease-exit:      cubic-bezier(0.3, 0, 1, 1); /* @kind other */
+  --ease-water:     cubic-bezier(0.45, 0, 0.1, 1); /* @kind other */
+  --ease-waste:     cubic-bezier(0.3, 0, 0.2, 1); /* @kind other */
+
+  --dur-fast:       120ms;     /* @kind other */
+  --dur-base:       200ms;     /* @kind other */
+  --dur-slow:       320ms;     /* @kind other */
+  --dur-reveal:     520ms;     /* @kind other */
+
+  /* ---- Layout ---- */
+  --container-max:  1280px;                          /* @kind spacing */
+  --container-pad:  clamp(20px, 4vw, 48px);          /* @kind spacing */
+  --page-gutter:    max(24px, env(safe-area-inset-left)); /* @kind spacing */
+}
+
+/* =========================================================
+ * 2. BRAND LAYERS — override only what differs
+ * ========================================================= */
+[data-brand="waste"] {
+  --brand-primary:        var(--waste-primary-500);
+  --brand-primary-hover:  var(--waste-primary-600);
+  --brand-primary-press:  var(--waste-primary-700);
+  --brand-primary-ink:    #FFFFFF;
+  --brand-primary-tint:   var(--waste-primary-50);
+  --brand-secondary:      var(--waste-deep-500);
+  --brand-accent:         var(--waste-accent);
+
+  /* Waste chart scale — earthy, solid, operational */
+  --chart-1: #43B02A;
+  --chart-2: #205C40;
+  --chart-3: #F19E21;
+  --chart-4: #A87E4B;
+  --chart-5: #7A8189;
+  --chart-6: #D64545;
+  --chart-7: #377B52;
+  --chart-8: #2B6C1A;
+
+  --fg-link:        var(--waste-deep-500);
+  --fg-link-hover:  var(--waste-deep-600);
+
+  /* Motion feel — direct, functional */
+  --brand-ease:     var(--ease-waste);
+  --brand-dur:      var(--dur-fast);
+}
+
+[data-brand="water"] {
+  --brand-primary:        var(--water-primary-500);
+  --brand-primary-hover:  var(--water-primary-600);
+  --brand-primary-press:  var(--water-primary-700);
+  --brand-primary-ink:    #FFFFFF;
+  --brand-primary-tint:   var(--water-primary-50);
+  --brand-secondary:      var(--water-deep-500);
+  --brand-accent:         var(--water-accent);
+
+  /* Water chart scale — fluid, graduated, predictive */
+  --chart-1: #3E8DD6;
+  --chart-2: #175787;
+  --chart-3: #5EC8D9;
+  --chart-4: #9BC4EE;
+  --chart-5: #F25B8E;
+  --chart-6: #F19E21;
+  --chart-7: #2E73B6;
+  --chart-8: #7A8189;
+
+  --fg-link:        var(--water-primary-600);
+  --fg-link-hover:  var(--water-primary-700);
+
+  --brand-ease:     var(--ease-water);
+  --brand-dur:      var(--dur-base);
+}
+
+/* =========================================================
+ * 3. SEMANTIC TYPE STYLES
+ * ========================================================= */
+html {
+  font-family: var(--font-sans);
+  color: var(--fg-1);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--ls-body);
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 { margin: 0; color: var(--fg-1); font-family: var(--font-display); }
+
+.ds-display, .display {
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  font-weight: var(--fw-semibold);
+}
+
+h1, .h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-heading);
+  font-weight: var(--fw-semibold);
+}
+h2, .h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-heading);
+  font-weight: var(--fw-semibold);
+}
+h3, .h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  font-weight: var(--fw-semibold);
+}
+h4, .h4 {
+  font-size: var(--fs-h4);
+  line-height: 1.3;
+  font-weight: var(--fw-semibold);
+}
+h5, .h5 {
+  font-size: var(--fs-h5);
+  line-height: 1.35;
+  font-weight: var(--fw-medium);
+}
+h6, .h6, .eyebrow {
+  font-size: var(--fs-h6);
+  line-height: 1.3;
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+p, .body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-relaxed);
+  color: var(--fg-2);
+  margin: 0 0 1rem;
+  text-wrap: pretty;
+}
+
+.body-lg { font-size: var(--fs-body-lg); line-height: var(--lh-relaxed); }
+.body-sm { font-size: var(--fs-body-sm); line-height: var(--lh-normal); }
+.label   { font-size: var(--fs-label); font-weight: var(--fw-medium); color: var(--fg-2); }
+.caption { font-size: var(--fs-caption); color: var(--fg-3); }
+
+.mono, code, kbd, samp, pre, .numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Brand tone variants — Waste = structured/strong, Water = lighter/intelligent ---- */
+[data-brand="waste"] h1,
+[data-brand="waste"] h2,
+[data-brand="waste"] h3 { font-weight: var(--fw-bold); letter-spacing: -0.015em; }
+
+[data-brand="water"] h1,
+[data-brand="water"] h2 { font-weight: var(--fw-medium); letter-spacing: -0.022em; }
+[data-brand="water"] h3 { font-weight: var(--fw-medium); }
+
+/* Links */
+a { color: var(--fg-link); text-decoration: none; transition: color var(--dur-fast) var(--ease-standard); }
+a:hover { color: var(--fg-link-hover); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Focus */
+:focus-visible { outline: none; box-shadow: var(--shadow-focus); border-radius: inherit; }
+
+/* Selection */
+::selection { background: color-mix(in oklab, var(--brand-primary) 28%, transparent); color: var(--fg-1); }

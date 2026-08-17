@@ -1,633 +1,559 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ThinkOS — Pays for Itself</title>
-<style>
-  :root{
-    --bg:#faf9f7;
-    --card:#ffffff;
-    --border:#e9e5df;
-    --border-soft:#f0ede8;
-    --ink:#1a1a18;
-    --ink-2:#4d4a45;
-    --ink-3:#8a867f;
-    --green:#1d5c38;
-    --green-soft:#eef4ef;
-    --chip-bg:#dbe9fe;
-    --chip-ink:#1d4fd8;
-    --c-fleet:#3b6fd4;
-    --c-admin:#e29b32;
-    --c-mat:#3d7d5a;
-    --c-risk:#8a63c9;
-    --radius:22px;
-    --radius-sm:12px;
-    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{-webkit-text-size-adjust:100%}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;padding:0 20px 60px}
-  .wrap{max-width:980px;margin:0 auto}
-
-  /* ── Top bar ─────────────────────────────── */
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 4px;flex-wrap:wrap}
-  .brand{display:flex;align-items:baseline;gap:10px}
-  .wordmark{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.01em}
-  .chip{display:inline-block;background:var(--chip-bg);color:var(--chip-ink);font-size:12px;font-weight:600;padding:2px 9px;border-radius:7px;vertical-align:2px}
-  .actions{display:flex;gap:8px;flex-wrap:wrap}
-  .btn{font-family:var(--sans);font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:11px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--ink);transition:background .15s,transform .05s}
-  .btn:hover{background:#f6f4f1}
-  .btn:active{transform:scale(.98)}
-  .btn.dark{background:#191917;color:#fff;border-color:#191917}
-  .btn.dark:hover{background:#333}
-
-  /* ── Hero heading ────────────────────────── */
-  .eyebrow{text-align:center;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:26px}
-  .clientname{border-bottom:1.5px dashed #c8c3bb;min-width:150px;display:inline-block;text-align:center;color:var(--ink);outline:none;padding:0 6px;font-weight:700;letter-spacing:.14em}
-  .clientname:empty::before{content:"ADD CLIENT NAME";color:#b6b1a8;font-weight:600}
-  h1.display{font-family:var(--serif);font-weight:600;font-size:clamp(32px,5vw,46px);letter-spacing:-.015em;text-align:center;margin:10px 0 6px}
-  .subhead{font-family:var(--serif);text-align:center;font-size:clamp(19px,2.6vw,24px);color:var(--green);font-weight:600;margin-bottom:14px}
-  .intro{max-width:640px;margin:0 auto 26px;text-align:center;color:var(--ink-2)}
-
-  /* ── Scenario controls ───────────────────── */
-  .controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-  .select-pill{position:relative}
-  .select-pill select{appearance:none;-webkit-appearance:none;font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--border);border-radius:11px;padding:9px 34px 9px 14px;cursor:pointer}
-  .select-pill::after{content:"▾";position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ink-3);font-size:11px}
-  .sector-note{max-width:760px;margin:0 auto 30px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 20px;font-size:14px;color:var(--ink-2)}
-  .sector-note b{color:var(--ink)}
-
-  /* ── Cards ───────────────────────────────── */
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:22px;overflow:hidden}
-  .card-pad{padding:30px 34px}
-  @media(max-width:640px){.card-pad{padding:22px 18px}}
-
-  /* Hero results card — warm gradient like the panel design */
-  .hero{background:linear-gradient(135deg,#ffffff 0%,#fdf6ee 55%,#fbeadf 100%)}
-  .kicker{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
-  .big{font-family:var(--serif);font-size:clamp(52px,9vw,84px);font-weight:600;letter-spacing:-.02em;line-height:1.02}
-  .big-sub{color:var(--ink-2);font-size:14.5px;margin-top:10px}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:26px}
-  .kpi{background:rgba(255,255,255,.85);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
-  .kpi .l{font-size:12.5px;color:var(--ink-3);font-weight:600}
-  .kpi .v{font-family:var(--serif);font-size:27px;font-weight:600;color:var(--green);margin:2px 0;letter-spacing:-.01em}
-  .kpi .s{font-size:12px;color:var(--ink-3);line-height:1.4}
-
-  /* ── Drivers chart ───────────────────────── */
-  .drivers-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
-  .drivers-head h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.01em}
-  .drivers-head .hint{font-size:13px;color:var(--ink-3)}
-  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 4px;font-size:13px;color:var(--ink-2)}
-  .legend span{display:flex;align-items:center;gap:7px}
-  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
-  .grp{margin-top:22px}
-  .grp-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--border-soft);padding-bottom:6px;margin-bottom:4px}
-  .grp-head .gname{font-size:12px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
-  .grp-head .gtotal{font-size:14px;font-weight:700}
-  .row{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:14px;align-items:center;padding:7px 0}
-  @media(max-width:560px){.row{grid-template-columns:1fr;gap:2px}}
-  .row .lab{text-align:right}
-  @media(max-width:560px){.row .lab{text-align:left}}
-  .row .lab .t{font-size:14px;font-weight:600}
-  .row .lab .u{font-size:12px;color:var(--ink-3)}
-  .barcell{display:flex;align-items:center;gap:10px;min-height:24px}
-  .bar{height:20px;border-radius:4px;min-width:3px;transition:width .35s ease}
-  .bval{font-size:13.5px;font-weight:700;white-space:nowrap}
-  .na{font-size:13px;color:var(--ink-3);font-style:italic}
-
-  /* ── Input panels ────────────────────────── */
-  .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
-  @media(max-width:760px){.panels{grid-template-columns:1fr}}
-  details.panel{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;align-self:start}
-  details.panel summary{list-style:none;display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;font-weight:700;font-size:15px;user-select:none}
-  details.panel summary::-webkit-details-marker{display:none}
-  details.panel summary .pdot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}
-  details.panel summary .caret{margin-left:auto;color:var(--ink-3);font-size:12px;transition:transform .2s}
-  details.panel[open] summary .caret{transform:rotate(180deg)}
-  .panel-body{padding:2px 20px 16px}
-  .frow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 0;border-top:1px solid var(--border-soft)}
-  .frow:first-child{border-top:none}
-  .frow .fl{flex:1}
-  .frow .fl .t{font-size:14px;font-weight:600}
-  .frow .fl .d{font-size:12px;color:var(--ink-3);line-height:1.35}
-  .frow .fi{display:flex;align-items:center;gap:6px;flex:none}
-  .frow .fi .fix{font-size:12.5px;color:var(--ink-3)}
-  .frow input{width:88px;font-family:var(--sans);font-size:14px;font-weight:600;text-align:right;color:var(--ink);background:#fbfaf8;border:1px solid var(--border);border-radius:9px;padding:7px 10px;outline:none}
-  .frow input:focus{border-color:#b9b3a9;background:#fff}
-  .frow.dim{opacity:.42;pointer-events:none}
-  .frow.dim input{background:#f3f1ed}
-
-  /* ── Methodology ─────────────────────────── */
-  .method h3{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:20px 0 8px}
-  .method h3:first-child{margin-top:0}
-  .method ul{padding-left:20px;color:var(--ink-2)}
-  .method li{margin-bottom:8px}
-  .method b{color:var(--ink)}
-
-  footer{max-width:980px;margin:8px auto 0;padding:18px 4px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-3)}
-  footer .fm{font-family:var(--serif);font-weight:600;color:var(--ink-2)}
-  footer a{color:var(--green);text-decoration:none;font-weight:600}
-
-  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#191917;color:#fff;font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:all .25s}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-  @media print{
-    body{background:#fff;padding:0}
-    .actions,.controls{display:none}
-    .card,details.panel{border-color:#ddd;break-inside:avoid}
-    .hero{background:#fdf6ee}
-  }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
 <body>
-<div class="wrap">
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/matter-design-system-964dcb0e-46f3-43d4-9589-591a8fe357f2/styles.css">
+<script src="_ds/matter-design-system-964dcb0e-46f3-43d4-9589-591a8fe357f2/_ds_bundle.js"></script>
+<style>
+  body{background:#FAFAF8;margin:0;font-family:'Poppins',system-ui,sans-serif;color:#0E1A1F;-webkit-font-smoothing:antialiased}
+  a{color:#205C40;text-decoration:none}
+  a:hover{color:#194A33;text-decoration:underline;text-underline-offset:3px}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+  }
+</style>
+</helmet>
 
-  <div class="topbar">
-    <div class="brand">
-      <span class="wordmark">ThinkOS</span>
-      <span class="chip">Interactive value case</span>
+<div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,4vw,48px) 64px">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:24px 0 20px;border-bottom:1px solid #E6E9EC">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="assets/ThinkOS_black.svg" alt="ThinkOS" style="height:24px;display:block">
+      <span style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:#205C40;background:#E7F0EB;padding:4px 10px;border-radius:6px">Interactive value case</span>
     </div>
-    <div class="actions">
-      <button class="btn" id="btnPrint">Print / PDF</button>
-      <button class="btn" id="btnReset">Reset to sector benchmark</button>
-      <button class="btn dark" id="btnShare">Copy share link</button>
+    <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" onClick="{{ onPrint }}" style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;padding:9px 16px;border-radius:6px;cursor:pointer;border:1px solid #C3C9CE;background:#fff;color:#0E1A1F;transition:background 120ms cubic-bezier(.3,0,.2,1)" style-hover="background:#F4F5F6" style-active="transform:scale(0.98)">Print / PDF</button>
+      <button type="button" onClick="{{ onReset }}" style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;padding:9px 16px;border-radius:6px;cursor:pointer;border:1px solid #C3C9CE;background:#fff;color:#0E1A1F;transition:background 120ms cubic-bezier(.3,0,.2,1)" style-hover="background:#F4F5F6" style-active="transform:scale(0.98)">Reset to sector benchmark</button>
+      <button type="button" onClick="{{ onShare }}" style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;border-radius:6px;cursor:pointer;border:1px solid #43B02A;background:#43B02A;color:#fff;transition:background 120ms cubic-bezier(.3,0,.2,1)" style-hover="background:#378E22;border-color:#378E22" style-active="transform:scale(0.98)">Copy share link</button>
     </div>
   </div>
 
-  <div class="eyebrow">Value case prepared for&nbsp; <span class="clientname" id="clientName" contenteditable="true" spellcheck="false"></span></div>
-  <h1 class="display">ThinkOS — pays for itself</h1>
-  <div class="subhead">How much will you save?</div>
-  <p class="intro">Model the annual savings a ThinkOS deployment delivers across fleet, administration, materials and compliance. Every figure below is an editable assumption — start from the sector benchmark, then replace it with your own numbers, live in the meeting.</p>
-
-  <div class="controls">
-    <div class="select-pill"><select id="sectorSel" aria-label="Sector"></select></div>
-    <div class="select-pill"><select id="currencySel" aria-label="Currency"></select></div>
+  <div style="padding:48px 0 8px;max-width:760px">
+    <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:#7A8189;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span>Value case prepared for</span>
+      <span contenteditable="true" spellcheck="false" ref="{{ clientRef }}" onInput="{{ onClientInput }}" style="border-bottom:1.5px dashed #C3C9CE;min-width:150px;display:inline-block;color:#0E1A1F;outline:none;padding:0 4px;font-weight:600;letter-spacing:0.08em" style-before="content:'{{ clientPlaceholder }}';color:#C3C9CE;font-weight:500"></span>
+    </div>
+    <h1 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:clamp(34px,4.6vw,52px);line-height:1.08;letter-spacing:-0.02em;margin:16px 0 0;color:#0E1A1F">ThinkOS — pays for itself</h1>
+    <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:clamp(19px,2.4vw,24px);color:#205C40;letter-spacing:-0.01em;margin-top:6px">How much will you save?</div>
+    <p style="font-size:16px;line-height:1.6;color:#53565A;margin:20px 0 0;text-wrap:pretty">Model the annual savings a ThinkOS deployment delivers across fleet, administration, materials and compliance. Every figure below is an editable assumption — start from the sector benchmark, then replace it with your own numbers, live in the meeting.</p>
   </div>
-  <div class="sector-note" id="sectorNote"></div>
 
-  <!-- Hero results -->
-  <div class="card hero">
-    <div class="card-pad">
-      <div class="kicker">Total annual savings</div>
-      <div class="big" id="bigTotal">—</div>
-      <div class="big-sub" id="bigSub"></div>
-      <div class="kpis">
-        <div class="kpi"><div class="l">Year 1 net benefit</div><div class="v" id="kNet1">—</div><div class="s">after licence + implementation</div></div>
-        <div class="kpi"><div class="l">Year 1 ROI</div><div class="v" id="kRoi1">—</div><div class="s" id="kRoi3s">3-year ROI —</div></div>
-        <div class="kpi"><div class="l">Payback</div><div class="v" id="kPayback">—</div><div class="s">to recover first-year cost</div></div>
-        <div class="kpi"><div class="l">3-year net benefit</div><div class="v" id="kNet3">—</div><div class="s" id="kCo2s">— tCO₂e avoided per year</div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:28px 0 16px" class="no-print">
+    <select aria-label="Sector" value="{{ sector }}" onChange="{{ onSector }}" style="appearance:none;-webkit-appearance:none;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;color:#0E1A1F;background:#fff;border:1px solid #C3C9CE;border-radius:6px;padding:9px 34px 9px 14px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,#7A8189 50%),linear-gradient(135deg,#7A8189 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px,5px 5px;background-repeat:no-repeat">
+      <sc-for list="{{ sectorOptions }}" as="s" hint-placeholder-count="6">
+        <option value="{{ s.k }}">{{ s.name }}</option>
+      </sc-for>
+    </select>
+    <select aria-label="Currency" value="{{ currency }}" onChange="{{ onCurrency }}" style="appearance:none;-webkit-appearance:none;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;color:#0E1A1F;background:#fff;border:1px solid #C3C9CE;border-radius:6px;padding:9px 34px 9px 14px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,#7A8189 50%),linear-gradient(135deg,#7A8189 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px,5px 5px;background-repeat:no-repeat">
+      <sc-for list="{{ currencyOptions }}" as="c" hint-placeholder-count="6">
+        <option value="{{ c.k }}">{{ c.label }}</option>
+      </sc-for>
+    </select>
+  </div>
+
+  <div style="background:#fff;border:1px solid #E6E9EC;border-left:3px solid #43B02A;border-radius:10px;padding:16px 20px;font-size:14px;line-height:1.6;color:#53565A;margin-bottom:24px">
+    <b style="color:#0E1A1F;font-weight:600">{{ sectorLead }}</b> {{ sectorBody }}
+  </div>
+
+  <div style="background:#133826;border-radius:14px;padding:36px clamp(22px,3vw,40px);margin-bottom:20px;color:#fff">
+    <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:#8FBFA0">Total annual savings</div>
+    <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:clamp(52px,8.5vw,84px);line-height:1.02;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;margin-top:8px">{{ bigTotal }}</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#C4DDCE;margin-top:12px;font-variant-numeric:tabular-nums">{{ bigSub }}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:32px">
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:16px 18px">
+        <div style="font-size:12.5px;color:#8FBFA0;font-weight:500">Year 1 net benefit</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:28px;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;margin:4px 0 2px">{{ kNet1 }}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.4">after licence + implementation</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:16px 18px">
+        <div style="font-size:12.5px;color:#8FBFA0;font-weight:500">Year 1 ROI</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:28px;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;margin:4px 0 2px">{{ kRoi1 }}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.4">{{ kRoi3s }}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:16px 18px">
+        <div style="font-size:12.5px;color:#8FBFA0;font-weight:500">Payback</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:28px;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;margin:4px 0 2px">{{ kPayback }}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.4">to recover first-year cost</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:16px 18px">
+        <div style="font-size:12.5px;color:#8FBFA0;font-weight:500">3-year net benefit</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:28px;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;margin:4px 0 2px">{{ kNet3 }}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.4">{{ kCo2s }}</div>
       </div>
     </div>
   </div>
 
-  <!-- Drivers -->
-  <div class="card">
-    <div class="card-pad">
-      <div class="drivers-head"><h2>Where the savings come from</h2><span class="hint">Annual, by driver</span></div>
-      <div class="legend">
-        <span><i class="dot" style="background:var(--c-fleet)"></i>Fleet &amp; routes</span>
-        <span><i class="dot" style="background:var(--c-admin)"></i>Admin &amp; time released</span>
-        <span><i class="dot" style="background:var(--c-mat)"></i>Materials &amp; disposal</span>
-        <span><i class="dot" style="background:var(--c-risk)"></i>Risk &amp; compliance</span>
+  <div style="background:#fff;border:1px solid #E6E9EC;border-radius:10px;padding:28px clamp(20px,3vw,32px);margin-bottom:20px">
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <h2 style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.015em;margin:0">Where the savings come from</h2>
+      <span style="font-size:13px;color:#7A8189">Annual, by driver</span>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin:14px 0 4px;font-size:13px;color:#53565A">
+      <span style="display:flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#43B02A;display:inline-block"></i>Fleet &amp; routes</span>
+      <span style="display:flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#F19E21;display:inline-block"></i>Admin &amp; time released</span>
+      <span style="display:flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#205C40;display:inline-block"></i>Materials &amp; disposal</span>
+      <span style="display:flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:#A87E4B;display:inline-block"></i>Risk &amp; compliance</span>
+    </div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+      <div style="margin-top:24px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid #E6E9EC;padding-bottom:7px;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#7A8189">{{ g.name }}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#0E1A1F;font-variant-numeric:tabular-nums">{{ g.total }}</span>
+        </div>
+        <sc-for list="{{ g.rows }}" as="row" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:minmax(150px,250px) 1fr;gap:16px;align-items:center;padding:8px 0">
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:500;color:#0E1A1F">{{ row.t }}</div>
+              <div style="font-size:12px;color:#7A8189;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ row.u }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:24px">
+              <div style="height:20px;border-radius:4px;transition:width 200ms cubic-bezier(.3,0,.2,1);width:{{ row.w }};background:{{ row.color }}"></div>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:600;white-space:nowrap;color:{{ row.valColor }};font-variant-numeric:tabular-nums">{{ row.val }}</span>
+            </div>
+          </div>
+        </sc-for>
       </div>
-      <div id="drivers"></div>
-    </div>
+    </sc-for>
   </div>
 
-  <!-- Input panels -->
-  <div class="panels" id="panels"></div>
-
-  <!-- Methodology -->
-  <div class="card">
-    <div class="card-pad method">
-      <h3>How this model works</h3>
-      <ul>
-        <li><b>No double counting.</b> Right-sizing removes whole collections first; route optimisation is then applied only to the collections that remain, so avoided lifts and reduced mileage never claim the same kilometre twice.</li>
-        <li><b>Diversion savings</b> are the gate-fee differential between landfill (including levy) and recycling, applied to the tonnes moved by the diversion uplift — plus any rebate on those tonnes.</li>
-        <li><b>Time savings</b> are hours released × blended admin cost. They are real cost savings only where the hours are redeployed or headcount is avoided; otherwise treat them as capacity released and say so.</li>
-        <li><b>Avoided penalties</b> are a probability-weighted expected annual exposure, not a guaranteed saving. Zero this field for a conservative case.</li>
-        <li><b>Payback</b> is implementation plus the first year's licence, divided by average monthly gross savings.</li>
-        <li>Sector benchmarks are indicative starting points for discussion, not a quote. Switching currency converts the figures at an indicative rate — every converted figure stays editable.</li>
-      </ul>
-      <h3>Sharing this page</h3>
-      <ul>
-        <li>This is a single self-contained file — no server, no dependencies, no tracking. It works from a web server, an email attachment, a shared drive, or straight off a USB stick, online or offline.</li>
-        <li><b>Copy share link</b> packs the whole scenario — sector, currency, client name and every edited assumption — into the part of the URL after the #. That fragment is never sent to a server; it is read by this page in the recipient's own browser. Send the link and they open your exact numbers.</li>
-        <li>Recipients can change anything without affecting your copy. <b>Reset to sector benchmark</b> returns the page to its starting figures.</li>
-      </ul>
-    </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px;margin-bottom:20px;align-items:start">
+    <sc-for list="{{ panels }}" as="p" hint-placeholder-count="6">
+      <div style="background:#fff;border:1px solid #E6E9EC;border-radius:10px;overflow:hidden">
+        <div onClick="{{ p.onToggle }}" style="display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;font-weight:600;font-size:15px;user-select:none;color:#0E1A1F">
+          <span style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ p.dot }}"></span>{{ p.title }}
+          <span style="margin-left:auto;color:#7A8189;font-size:11px;transition:transform 120ms cubic-bezier(.3,0,.2,1);transform:{{ p.caret }}">▼</span>
+        </div>
+        <sc-if value="{{ p.open }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 20px 16px">
+            <sc-for list="{{ p.fields }}" as="f" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid #F0F1F2;opacity:{{ f.op }};pointer-events:{{ f.pe }}">
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:500;color:#0E1A1F">{{ f.t }}</div>
+                  <div style="font-size:12px;color:#7A8189;line-height:1.4">{{ f.d }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex:none">
+                  <span style="font-size:12.5px;color:#7A8189;font-family:'IBM Plex Mono',monospace">{{ f.pre }}</span>
+                  <input type="number" inputmode="decimal" step="{{ f.step }}" value="{{ f.val }}" onChange="{{ f.onInput }}" style="width:92px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:500;text-align:right;color:#0E1A1F;background:#FAFAF8;border:1px solid #E6E9EC;border-radius:6px;padding:7px 10px;outline:none;font-variant-numeric:tabular-nums" style-focus="border-color:#43B02A;background:#fff">
+                  <span style="font-size:12.5px;color:#7A8189;font-family:'IBM Plex Mono',monospace;min-width:32px">{{ f.suf }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
   </div>
 
+  <div style="background:#fff;border:1px solid #E6E9EC;border-radius:10px;padding:28px clamp(20px,3vw,32px)">
+    <h3 style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#7A8189;margin:0 0 12px">How this model works</h3>
+    <ul style="padding-left:20px;margin:0;color:#53565A;font-size:14.5px;line-height:1.6">
+      <li style="margin-bottom:10px"><b style="color:#0E1A1F;font-weight:600">No double counting.</b> Right-sizing removes whole collections first; route optimisation is then applied only to the collections that remain, so avoided lifts and reduced mileage never claim the same kilometre twice.</li>
+      <li style="margin-bottom:10px"><b style="color:#0E1A1F;font-weight:600">Diversion savings</b> are the gate-fee differential between landfill (including levy) and recycling, applied to the tonnes moved by the diversion uplift — plus any rebate on those tonnes.</li>
+      <li style="margin-bottom:10px"><b style="color:#0E1A1F;font-weight:600">Time savings</b> are hours released × blended admin cost. They are real cost savings only where the hours are redeployed or headcount is avoided; otherwise treat them as capacity released and say so.</li>
+      <li style="margin-bottom:10px"><b style="color:#0E1A1F;font-weight:600">Avoided penalties</b> are a probability-weighted expected annual exposure, not a guaranteed saving. Zero this field for a conservative case.</li>
+      <li style="margin-bottom:10px"><b style="color:#0E1A1F;font-weight:600">Payback</b> is implementation plus the first year's licence, divided by average monthly gross savings.</li>
+      <li style="margin-bottom:10px">Sector benchmarks are indicative starting points for discussion, not a quote. Switching currency converts the figures at an indicative rate — every converted figure stays editable.</li>
+    </ul>
+    <h3 style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#7A8189;margin:24px 0 12px">Sharing this page</h3>
+    <ul style="padding-left:20px;margin:0;color:#53565A;font-size:14.5px;line-height:1.6">
+      <li style="margin-bottom:10px">This is a single self-contained file — no server, no dependencies, no tracking. It works from a web server, an email attachment, a shared drive, or straight off a USB stick, online or offline.</li>
+      <li style="margin-bottom:10px"><b style="color:#0E1A1F;font-weight:600">Copy share link</b> packs the whole scenario — sector, currency, client name and every edited assumption — into the part of the URL after the #. That fragment is never sent to a server; it is read by this page in the recipient's own browser. Send the link and they open your exact numbers.</li>
+      <li style="margin-bottom:10px">Recipients can change anything without affecting your copy. <b style="color:#0E1A1F;font-weight:600">Reset to sector benchmark</b> returns the page to its starting figures.</li>
+    </ul>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:24px 0 0;margin-top:24px;border-top:1px solid #E6E9EC;font-size:13px;color:#7A8189">
+    <span>Matter · ThinkOS · 1300 265 140</span>
+    <span>Questions about this model? <a href="mailto:len@matter.city">len@matter.city</a></span>
+  </div>
 </div>
 
-<footer>
-  <span class="fm">ThinkOS</span>
-  <span>Questions about this model? &nbsp;<a href="mailto:len@matter.city">len@matter.city</a></span>
-</footer>
+<div style="position:fixed;left:50%;bottom:28px;background:#0E1A1F;color:#fff;font-size:13.5px;font-weight:500;padding:10px 18px;border-radius:6px;pointer-events:none;transition:opacity 200ms cubic-bezier(.3,0,.2,1),transform 200ms cubic-bezier(.3,0,.2,1);opacity:{{ toastOp }};transform:{{ toastT }}">{{ toastMsg }}</div>
 
-<div class="toast" id="toast">Link copied — send it to open this exact scenario</div>
-
-<script>
-/* ═══════════════ Configuration ═══════════════ */
-
-const CURRENCIES = {
-  AUD:{label:"A$ — Australian dollar", sym:"A$", rate:1},
-  NZD:{label:"NZ$ — New Zealand dollar", sym:"NZ$", rate:1.09},
-  USD:{label:"US$ — US dollar", sym:"US$", rate:0.66},
-  SGD:{label:"S$ — Singapore dollar", sym:"S$", rate:0.84},
-  GBP:{label:"£ — British pound", sym:"£", rate:0.52},
-  EUR:{label:"€ — Euro", sym:"€", rate:0.61}
-};
-
-/* Field definitions. m:true = monetary (converted on currency switch). */
-const PANELS = [
- {id:"scale", title:"Scale of the operation", open:true, fields:[
-   {k:"sites", t:"Sites in scope", suf:"sites"},
-   {k:"tonnage", t:"Annual waste tonnage", suf:"t/yr"},
-   {k:"wasteSpend", t:"Annual waste spend", d:"haulage + disposal, all streams", pre:true, suf:"/yr", m:true},
-   {k:"collectionsWk", t:"Collections per week", d:"total lifts across all sites", suf:"/wk"},
-   {k:"kmPerCollection", t:"Round-trip km per collection", suf:"km"},
-   {k:"costPerCollection", t:"Cost per collection", d:"contracted lift rate or internal cost", pre:true, m:true}
- ]},
- {id:"costs", title:"Current costs & losses", open:true, fields:[
-   {k:"contamCharges", t:"Contamination charges", d:"rejected loads, cross-contamination fees", pre:true, suf:"/yr", m:true},
-   {k:"missedPerYr", t:"Missed / failed collections", suf:"/yr"},
-   {k:"costPerMissed", t:"Cost per missed collection", d:"callout, overflow, complaint handling", pre:true, m:true},
-   {k:"currentDiversion", t:"Current diversion from landfill", suf:"%"},
-   {k:"achievableDiversion", t:"Achievable diversion rate", suf:"%"},
-   {k:"landfillCost", t:"Landfill cost incl. levy", pre:true, suf:"/t", m:true},
-   {k:"gateFee", t:"Recycling gate fee", pre:true, suf:"/t", m:true},
-   {k:"rebate", t:"Recyclate rebate", d:"net revenue on clean segregated material", pre:true, suf:"/t", m:true},
-   {k:"highShare", t:"Share of tonnage in high-cost stream", d:"clinical / hazardous / secure", suf:"%"},
-   {k:"wrongSeg", t:"Of that, wrongly segregated", d:"general waste sitting in the costly stream", suf:"%", dimIf:"highShare"},
-   {k:"highCost", t:"High-cost stream disposal", pre:true, suf:"/t", m:true, dimIf:"highShare"},
-   {k:"generalCost", t:"General stream disposal", pre:true, suf:"/t", m:true, dimIf:"highShare"},
-   {k:"errorRate", t:"Invoice error rate", d:"share of annual spend billed incorrectly", suf:"%"},
-   {k:"penaltyExposure", t:"Expected annual penalty exposure", d:"probability-weighted; zero this for a conservative case", pre:true, suf:"/yr", m:true}
- ]},
- {id:"levers", title:"Improvement levers", fields:[
-   {k:"rightSizing", t:"Collections removed by right-sizing", d:"fill-level data ends fixed-schedule over-servicing", suf:"%"},
-   {k:"routeOpt", t:"Mileage saved by route optimisation", d:"applied to the collections that remain", suf:"%"},
-   {k:"failedPrev", t:"Missed collections prevented", suf:"%"},
-   {k:"contamAvoid", t:"Contamination charges avoided", suf:"%"},
-   {k:"adminRelease", t:"Admin time released", d:"applied to the hours in 'Time spent today'", suf:"%"},
-   {k:"resegCorrect", t:"Wrong segregation corrected", d:"moved from the costly stream to general", suf:"%"},
-   {k:"errorRecovered", t:"Billing errors recovered", suf:"%"},
-   {k:"penaltyReduction", t:"Penalty exposure reduced", suf:"%"}
- ]},
- {id:"time", title:"Time spent today", fields:[
-   {k:"tTask", t:"Task & service management", d:"tickets, contractor chasing, scheduling", suf:"hr/yr"},
-   {k:"tReporting", t:"Reporting & data compilation", suf:"hr/yr"},
-   {k:"tInvoice", t:"Invoice checking time", suf:"hr/yr"},
-   {k:"tAudit", t:"Audit preparation", suf:"hr/yr"},
-   {k:"tTraining", t:"Training & onboarding", suf:"hr/yr"},
-   {k:"tCustody", t:"Chain-of-custody paperwork", suf:"hr/yr"}
- ]},
- {id:"rates", title:"Fleet & labour rates", fields:[
-   {k:"crewRate", t:"Crew cost per hour", pre:true, suf:"/hr", m:true},
-   {k:"adminRate", t:"Blended admin cost per hour", pre:true, suf:"/hr", m:true},
-   {k:"avgSpeed", t:"Average route speed", suf:"km/h"},
-   {k:"costPerKm", t:"Vehicle running cost per km", d:"fuel + maintenance + tyres", pre:true, suf:"/km", m:true, step:0.01}
- ]},
- {id:"invest", title:"Investment & factors", fields:[
-   {k:"licence", t:"ThinkOS annual licence", pre:true, suf:"/yr", m:true},
-   {k:"implementation", t:"Implementation (one-off)", d:"setup, integration, onboarding", pre:true, m:true},
-   {k:"co2PerTonne", t:"tCO₂e per tonne diverted", suf:"t", step:0.01},
-   {k:"co2PerKm", t:"CO₂e per vehicle-km", suf:"kg", step:0.01}
- ]}
-];
-
-const ALL_FIELDS = PANELS.flatMap(p=>p.fields);
-const MONETARY = new Set(ALL_FIELDS.filter(f=>f.m).map(f=>f.k));
-
-/* Sector benchmarks — all monetary values in AUD. */
-const SECTORS = {
- fm:{name:"Facilities Management",
-  blurb:"<b>Facilities Management.</b> Bins by floor, across a managed estate. The dominant cost is coordination — help-desk tickets, contractor chasing and client reporting — and secure paper adds a destruction-evidence burden on top.",
-  v:{sites:120,tonnage:4200,wasteSpend:1350000,collectionsWk:640,kmPerCollection:11,costPerCollection:39,
-     contamCharges:46000,missedPerYr:310,costPerMissed:165,currentDiversion:42,achievableDiversion:58,
-     landfillCost:245,gateFee:118,rebate:46,highShare:0,wrongSeg:0,highCost:1450,generalCost:210,
-     errorRate:2.8,penaltyExposure:35000,
-     rightSizing:16,routeOpt:11,failedPrev:58,contamAvoid:35,adminRelease:50,resegCorrect:80,errorRecovered:72,penaltyReduction:40,
-     tTask:1740,tReporting:1176,tInvoice:830,tAudit:448,tTraining:268,tCustody:120,
-     crewRate:46,adminRate:72,avgSpeed:30,costPerKm:1.10,
-     licence:145000,implementation:48000,co2PerTonne:0.46,co2PerKm:0.95}},
- health:{name:"Healthcare & Aged Care",
-  blurb:"<b>Healthcare & Aged Care.</b> Clinical, pharmaceutical and general streams side by side. The dominant cost is the clinical stream — general waste wrongly segregated into it pays clinical rates — and chain-of-custody evidence is a regulatory requirement, not a nicety.",
-  v:{sites:14,tonnage:1900,wasteSpend:2100000,collectionsWk:220,kmPerCollection:9,costPerCollection:52,
-     contamCharges:38000,missedPerYr:140,costPerMissed:190,currentDiversion:28,achievableDiversion:44,
-     landfillCost:245,gateFee:118,rebate:38,highShare:22,wrongSeg:30,highCost:1450,generalCost:210,
-     errorRate:3.2,penaltyExposure:120000,
-     rightSizing:12,routeOpt:9,failedPrev:55,contamAvoid:30,adminRelease:50,resegCorrect:75,errorRecovered:70,penaltyReduction:45,
-     tTask:1300,tReporting:1560,tInvoice:620,tAudit:720,tTraining:420,tCustody:640,
-     crewRate:48,adminRate:74,avgSpeed:27,costPerKm:1.10,
-     licence:118000,implementation:42000,co2PerTonne:0.46,co2PerKm:0.95}},
- hosp:{name:"Hospitality & Venues",
-  blurb:"<b>Hospitality & Venues.</b> Food organics dominate. The wins are FOGO diversion off the general stream, contamination control at the back-of-house bin line, and ending the fixed schedule that empties half-full bins.",
-  v:{sites:38,tonnage:2600,wasteSpend:820000,collectionsWk:430,kmPerCollection:7,costPerCollection:34,
-     contamCharges:52000,missedPerYr:260,costPerMissed:145,currentDiversion:30,achievableDiversion:55,
-     landfillCost:245,gateFee:105,rebate:40,highShare:0,wrongSeg:0,highCost:1450,generalCost:210,
-     errorRate:2.6,penaltyExposure:15000,
-     rightSizing:15,routeOpt:10,failedPrev:60,contamAvoid:40,adminRelease:50,resegCorrect:80,errorRecovered:72,penaltyReduction:35,
-     tTask:1150,tReporting:700,tInvoice:560,tAudit:240,tTraining:380,tCustody:60,
-     crewRate:44,adminRate:66,avgSpeed:26,costPerKm:1.10,
-     licence:92000,implementation:34000,co2PerTonne:0.46,co2PerKm:0.95}},
- edu:{name:"Education",
-  blurb:"<b>Education.</b> Campuses and schools with long distances between pickups. Route consolidation and term-time right-sizing do the heavy lifting; lab and workshop streams add a small but costly hazardous component.",
-  v:{sites:55,tonnage:2000,wasteSpend:640000,collectionsWk:310,kmPerCollection:12,costPerCollection:36,
-     contamCharges:30000,missedPerYr:150,costPerMissed:140,currentDiversion:35,achievableDiversion:60,
-     landfillCost:245,gateFee:110,rebate:42,highShare:3,wrongSeg:15,highCost:1200,generalCost:210,
-     errorRate:2.4,penaltyExposure:12000,
-     rightSizing:14,routeOpt:12,failedPrev:55,contamAvoid:35,adminRelease:50,resegCorrect:75,errorRecovered:70,penaltyReduction:35,
-     tTask:1250,tReporting:820,tInvoice:540,tAudit:300,tTraining:300,tCustody:100,
-     crewRate:45,adminRate:68,avgSpeed:29,costPerKm:1.05,
-     licence:88000,implementation:32000,co2PerTonne:0.46,co2PerKm:0.95}},
- retail:{name:"Retail & Shopping Centres",
-  blurb:"<b>Retail & Shopping Centres.</b> High-frequency lifts across tenancies, with cardboard as the valuable stream. The wins are compactor right-sizing, cardboard rebate capture, and recharging waste accurately to tenants instead of absorbing it.",
-  v:{sites:26,tonnage:5200,wasteSpend:1650000,collectionsWk:800,kmPerCollection:6,costPerCollection:41,
-     contamCharges:64000,missedPerYr:380,costPerMissed:170,currentDiversion:38,achievableDiversion:62,
-     landfillCost:245,gateFee:100,rebate:55,highShare:0,wrongSeg:0,highCost:1450,generalCost:210,
-     errorRate:3.0,penaltyExposure:20000,
-     rightSizing:17,routeOpt:10,failedPrev:60,contamAvoid:40,adminRelease:50,resegCorrect:80,errorRecovered:72,penaltyReduction:35,
-     tTask:1900,tReporting:1050,tInvoice:900,tAudit:380,tTraining:260,tCustody:110,
-     crewRate:45,adminRate:70,avgSpeed:24,costPerKm:1.15,
-     licence:132000,implementation:44000,co2PerTonne:0.46,co2PerKm:0.95}},
- constr:{name:"Construction & Property",
-  blurb:"<b>Construction & Property.</b> Skips and bins across active sites. Diversion reporting is contractual, gate fees swing by stream, and a wrongly classified load pays hazardous rates — evidence and classification are worth real money.",
-  v:{sites:18,tonnage:9500,wasteSpend:2450000,collectionsWk:250,kmPerCollection:18,costPerCollection:120,
-     contamCharges:85000,missedPerYr:90,costPerMissed:260,currentDiversion:55,achievableDiversion:78,
-     landfillCost:260,gateFee:95,rebate:30,highShare:6,wrongSeg:20,highCost:950,generalCost:230,
-     errorRate:3.4,penaltyExposure:60000,
-     rightSizing:12,routeOpt:11,failedPrev:50,contamAvoid:35,adminRelease:50,resegCorrect:75,errorRecovered:70,penaltyReduction:40,
-     tTask:1400,tReporting:980,tInvoice:760,tAudit:420,tTraining:340,tCustody:240,
-     crewRate:52,adminRate:75,avgSpeed:32,costPerKm:1.25,
-     licence:105000,implementation:40000,co2PerTonne:0.46,co2PerKm:0.95}}
-};
-
-/* ═══════════════ State ═══════════════ */
-
-let state = {
-  sector:"fm",
-  currency:"AUD",
-  client:"",
-  v: {...SECTORS.fm.v}
-};
-
-/* ═══════════════ Helpers ═══════════════ */
-
-const $ = id => document.getElementById(id);
-const sym = () => CURRENCIES[state.currency].sym;
-const nf0 = new Intl.NumberFormat("en-AU",{maximumFractionDigits:0});
-const nf1 = new Intl.NumberFormat("en-AU",{maximumFractionDigits:1,minimumFractionDigits:1});
-
-function money(v){ return sym()+nf0.format(Math.round(v)); }
-function compact(v){
-  const a=Math.abs(v), s=v<0?"−":"";
-  if(a>=995000) return s+sym()+( (a/1e6)>=10 ? nf0.format(a/1e6) : (Math.round(a/1e4)/100).toFixed(2).replace(/0$/,"") )+"M";
-  if(a>=1000) return s+sym()+nf0.format(Math.round(a/1000))+"K";
-  return s+sym()+nf0.format(a);
-}
-
-/* ═══════════════ Model ═══════════════ */
-
-function compute(){
-  const v = state.v, pct = x => (v[x]||0)/100;
-
-  // Fleet & routes
-  const collectionsYr = (v.collectionsWk||0)*52;
-  const liftsRemoved  = collectionsYr*pct("rightSizing");
-  const saveLifts     = liftsRemoved*(v.costPerCollection||0);
-  const remaining     = collectionsYr-liftsRemoved;
-  const kmRemoved     = remaining*(v.kmPerCollection||0)*pct("routeOpt");
-  const saveKm        = kmRemoved*(v.costPerKm||0);
-  const crewHours     = (v.avgSpeed||0)>0 ? kmRemoved/(v.avgSpeed) : 0;
-  const saveCrew      = crewHours*(v.crewRate||0);
-  const prevented     = (v.missedPerYr||0)*pct("failedPrev");
-  const saveFailed    = prevented*(v.costPerMissed||0);
-  const fleet         = saveLifts+saveCrew+saveKm+saveFailed;
-
-  // Admin & time
-  const rel = h => (h||0)*pct("adminRelease");
-  const adminRows = [
-    ["Task & service management", rel(v.tTask)],
-    ["Reporting & data compilation", rel(v.tReporting)],
-    ["Invoice checking time", rel(v.tInvoice)],
-    ["Audit preparation", rel(v.tAudit)],
-    ["Training & onboarding", rel(v.tTraining)],
-    ["Chain-of-custody paperwork", rel(v.tCustody)]
-  ].map(([t,h])=>({t, h, val:h*(v.adminRate||0)}));
-  const admin = adminRows.reduce((s,r)=>s+r.val,0);
-
-  // Materials & disposal
-  const uplift  = Math.max(0, pct("achievableDiversion")-pct("currentDiversion"));
-  const tDiv    = uplift*(v.tonnage||0);
-  const saveDiv = tDiv*((v.landfillCost||0)-(v.gateFee||0));
-  const saveReb = tDiv*(v.rebate||0);
-  const saveCon = (v.contamCharges||0)*pct("contamAvoid");
-  const tWrong  = (v.tonnage||0)*pct("highShare")*pct("wrongSeg");
-  const tReseg  = tWrong*pct("resegCorrect");
-  const saveSeg = tReseg*Math.max(0,(v.highCost||0)-(v.generalCost||0));
-  const segNA   = pct("highShare")<=0 || pct("wrongSeg")<=0;
-  const materials = saveDiv+saveReb+saveCon+(segNA?0:saveSeg);
-
-  // Risk & compliance
-  const saveBill = (v.wasteSpend||0)*pct("errorRate")*pct("errorRecovered");
-  const savePen  = (v.penaltyExposure||0)*pct("penaltyReduction");
-  const risk     = saveBill+savePen;
-
-  const total = fleet+admin+materials+risk;
-
-  // Investment
-  const y1cost = (v.licence||0)+(v.implementation||0);
-  const y1net  = total-y1cost;
-  const y1roi  = y1cost>0 ? y1net/y1cost : null;
-  const payback= total>0 ? y1cost/(total/12) : null;
-  const c3     = (v.implementation||0)+3*(v.licence||0);
-  const n3     = 3*total-c3;
-  const roi3   = c3>0 ? n3/c3 : null;
-  const co2    = tDiv*(v.co2PerTonne||0) + kmRemoved*(v.co2PerKm||0)/1000;
-
-  return {
-    total, y1cost, y1net, y1roi, payback, n3, roi3, co2,
-    groups:[
-      {name:"Fleet & routes", color:"var(--c-fleet)", total:fleet, rows:[
-        {t:"Collections avoided", u:nf0.format(Math.round(liftsRemoved))+" lifts/yr removed", val:saveLifts},
-        {t:"Crew hours on route", u:nf0.format(Math.round(crewHours))+" hr/yr released", val:saveCrew},
-        {t:"Mileage & fuel", u:nf0.format(Math.round(kmRemoved))+" km/yr removed", val:saveKm},
-        {t:"Failed collection callouts", u:nf0.format(Math.round(prevented))+" prevented/yr", val:saveFailed}
-      ]},
-      {name:"Admin & time released", color:"var(--c-admin)", total:admin,
-        rows:adminRows.map(r=>({t:r.t, u:nf0.format(Math.round(r.h))+" hr/yr released", val:r.val}))},
-      {name:"Materials & disposal", color:"var(--c-mat)", total:materials, rows:[
-        {t:"Landfill diversion", u:nf0.format(Math.round(tDiv))+" t/yr moved off landfill", val:saveDiv},
-        {t:"Recyclate rebate captured", u:"on "+nf0.format(Math.round(tDiv))+" t/yr", val:saveReb},
-        {t:"Contamination charges", u:nf0.format(v.contamAvoid||0)+"% of current charges avoided", val:saveCon},
-        {t:"Stream re-segregation", u:nf0.format(Math.round(tReseg))+" t/yr out of the costly stream", val:saveSeg, na:segNA}
-      ]},
-      {name:"Risk & compliance", color:"var(--c-risk)", total:risk, rows:[
-        {t:"Billing errors recovered", u:nf1.format(v.errorRate||0)+"% error rate, "+nf0.format(v.errorRecovered||0)+"% recovered", val:saveBill},
-        {t:"Penalty exposure reduced", u:"probability-weighted", val:savePen}
-      ]}
-    ]
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  static CURRENCIES = {
+    AUD:{label:"A$ — Australian dollar", sym:"A$", rate:1},
+    NZD:{label:"NZ$ — New Zealand dollar", sym:"NZ$", rate:1.09},
+    USD:{label:"US$ — US dollar", sym:"US$", rate:0.66},
+    SGD:{label:"S$ — Singapore dollar", sym:"S$", rate:0.84},
+    GBP:{label:"£ — British pound", sym:"£", rate:0.52},
+    EUR:{label:"€ — Euro", sym:"€", rate:0.61}
   };
-}
 
-/* ═══════════════ Rendering ═══════════════ */
+  static PANELS = [
+   {id:"scale", title:"Scale of the operation", open:true, dot:"#43B02A", fields:[
+     {k:"sites", t:"Sites in scope", suf:"sites"},
+     {k:"tonnage", t:"Annual waste tonnage", suf:"t/yr"},
+     {k:"wasteSpend", t:"Annual waste spend", d:"haulage + disposal, all streams", pre:true, suf:"/yr", m:true},
+     {k:"collectionsWk", t:"Collections per week", d:"total lifts across all sites", suf:"/wk"},
+     {k:"kmPerCollection", t:"Round-trip km per collection", suf:"km"},
+     {k:"costPerCollection", t:"Cost per collection", d:"contracted lift rate or internal cost", pre:true, m:true}
+   ]},
+   {id:"costs", title:"Current costs & losses", open:true, dot:"#F19E21", fields:[
+     {k:"contamCharges", t:"Contamination charges", d:"rejected loads, cross-contamination fees", pre:true, suf:"/yr", m:true},
+     {k:"missedPerYr", t:"Missed / failed collections", suf:"/yr"},
+     {k:"costPerMissed", t:"Cost per missed collection", d:"callout, overflow, complaint handling", pre:true, m:true},
+     {k:"currentDiversion", t:"Current diversion from landfill", suf:"%"},
+     {k:"achievableDiversion", t:"Achievable diversion rate", suf:"%"},
+     {k:"landfillCost", t:"Landfill cost incl. levy", pre:true, suf:"/t", m:true},
+     {k:"gateFee", t:"Recycling gate fee", pre:true, suf:"/t", m:true},
+     {k:"rebate", t:"Recyclate rebate", d:"net revenue on clean segregated material", pre:true, suf:"/t", m:true},
+     {k:"highShare", t:"Share of tonnage in high-cost stream", d:"clinical / hazardous / secure", suf:"%"},
+     {k:"wrongSeg", t:"Of that, wrongly segregated", d:"general waste sitting in the costly stream", suf:"%", dimIf:true},
+     {k:"highCost", t:"High-cost stream disposal", pre:true, suf:"/t", m:true, dimIf:true},
+     {k:"generalCost", t:"General stream disposal", pre:true, suf:"/t", m:true, dimIf:true},
+     {k:"errorRate", t:"Invoice error rate", d:"share of annual spend billed incorrectly", suf:"%"},
+     {k:"penaltyExposure", t:"Expected annual penalty exposure", d:"probability-weighted; zero this for a conservative case", pre:true, suf:"/yr", m:true}
+   ]},
+   {id:"levers", title:"Improvement levers", dot:"#205C40", fields:[
+     {k:"rightSizing", t:"Collections removed by right-sizing", d:"fill-level data ends fixed-schedule over-servicing", suf:"%"},
+     {k:"routeOpt", t:"Mileage saved by route optimisation", d:"applied to the collections that remain", suf:"%"},
+     {k:"failedPrev", t:"Missed collections prevented", suf:"%"},
+     {k:"contamAvoid", t:"Contamination charges avoided", suf:"%"},
+     {k:"adminRelease", t:"Admin time released", d:"applied to the hours in 'Time spent today'", suf:"%"},
+     {k:"resegCorrect", t:"Wrong segregation corrected", d:"moved from the costly stream to general", suf:"%"},
+     {k:"errorRecovered", t:"Billing errors recovered", suf:"%"},
+     {k:"penaltyReduction", t:"Penalty exposure reduced", suf:"%"}
+   ]},
+   {id:"time", title:"Time spent today", dot:"#A87E4B", fields:[
+     {k:"tTask", t:"Task & service management", d:"tickets, contractor chasing, scheduling", suf:"hr/yr"},
+     {k:"tReporting", t:"Reporting & data compilation", suf:"hr/yr"},
+     {k:"tInvoice", t:"Invoice checking time", suf:"hr/yr"},
+     {k:"tAudit", t:"Audit preparation", suf:"hr/yr"},
+     {k:"tTraining", t:"Training & onboarding", suf:"hr/yr"},
+     {k:"tCustody", t:"Chain-of-custody paperwork", suf:"hr/yr"}
+   ]},
+   {id:"rates", title:"Fleet & labour rates", dot:"#7A8189", fields:[
+     {k:"crewRate", t:"Crew cost per hour", pre:true, suf:"/hr", m:true},
+     {k:"adminRate", t:"Blended admin cost per hour", pre:true, suf:"/hr", m:true},
+     {k:"avgSpeed", t:"Average route speed", suf:"km/h"},
+     {k:"costPerKm", t:"Vehicle running cost per km", d:"fuel + maintenance + tyres", pre:true, suf:"/km", m:true, step:0.01}
+   ]},
+   {id:"invest", title:"Investment & factors", dot:"#0E1A1F", fields:[
+     {k:"licence", t:"ThinkOS annual licence", pre:true, suf:"/yr", m:true},
+     {k:"implementation", t:"Implementation (one-off)", d:"setup, integration, onboarding", pre:true, m:true},
+     {k:"co2PerTonne", t:"tCO₂e per tonne diverted", suf:"t", step:0.01},
+     {k:"co2PerKm", t:"CO₂e per vehicle-km", suf:"kg", step:0.01}
+   ]}
+  ];
 
-function buildControls(){
-  $("sectorSel").innerHTML = Object.entries(SECTORS)
-    .map(([k,s])=>`<option value="${k}">${s.name}</option>`).join("");
-  $("currencySel").innerHTML = Object.entries(CURRENCIES)
-    .map(([k,c])=>`<option value="${k}">${c.label}</option>`).join("");
-}
+  static SECTORS = {
+   fm:{name:"Facilities Management",
+    lead:"Facilities Management.",
+    body:"Bins by floor, across a managed estate. The dominant cost is coordination — help-desk tickets, contractor chasing and client reporting — and secure paper adds a destruction-evidence burden on top.",
+    v:{sites:120,tonnage:4200,wasteSpend:1350000,collectionsWk:640,kmPerCollection:11,costPerCollection:39,
+       contamCharges:46000,missedPerYr:310,costPerMissed:165,currentDiversion:42,achievableDiversion:58,
+       landfillCost:245,gateFee:118,rebate:46,highShare:0,wrongSeg:0,highCost:1450,generalCost:210,
+       errorRate:2.8,penaltyExposure:35000,
+       rightSizing:16,routeOpt:11,failedPrev:58,contamAvoid:35,adminRelease:50,resegCorrect:80,errorRecovered:72,penaltyReduction:40,
+       tTask:1740,tReporting:1176,tInvoice:830,tAudit:448,tTraining:268,tCustody:120,
+       crewRate:46,adminRate:72,avgSpeed:30,costPerKm:1.10,
+       licence:145000,implementation:48000,co2PerTonne:0.46,co2PerKm:0.95}},
+   health:{name:"Healthcare & Aged Care",
+    lead:"Healthcare & Aged Care.",
+    body:"Clinical, pharmaceutical and general streams side by side. The dominant cost is the clinical stream — general waste wrongly segregated into it pays clinical rates — and chain-of-custody evidence is a regulatory requirement, not a nicety.",
+    v:{sites:14,tonnage:1900,wasteSpend:2100000,collectionsWk:220,kmPerCollection:9,costPerCollection:52,
+       contamCharges:38000,missedPerYr:140,costPerMissed:190,currentDiversion:28,achievableDiversion:44,
+       landfillCost:245,gateFee:118,rebate:38,highShare:22,wrongSeg:30,highCost:1450,generalCost:210,
+       errorRate:3.2,penaltyExposure:120000,
+       rightSizing:12,routeOpt:9,failedPrev:55,contamAvoid:30,adminRelease:50,resegCorrect:75,errorRecovered:70,penaltyReduction:45,
+       tTask:1300,tReporting:1560,tInvoice:620,tAudit:720,tTraining:420,tCustody:640,
+       crewRate:48,adminRate:74,avgSpeed:27,costPerKm:1.10,
+       licence:118000,implementation:42000,co2PerTonne:0.46,co2PerKm:0.95}},
+   hosp:{name:"Hospitality & Venues",
+    lead:"Hospitality & Venues.",
+    body:"Food organics dominate. The wins are FOGO diversion off the general stream, contamination control at the back-of-house bin line, and ending the fixed schedule that empties half-full bins.",
+    v:{sites:38,tonnage:2600,wasteSpend:820000,collectionsWk:430,kmPerCollection:7,costPerCollection:34,
+       contamCharges:52000,missedPerYr:260,costPerMissed:145,currentDiversion:30,achievableDiversion:55,
+       landfillCost:245,gateFee:105,rebate:40,highShare:0,wrongSeg:0,highCost:1450,generalCost:210,
+       errorRate:2.6,penaltyExposure:15000,
+       rightSizing:15,routeOpt:10,failedPrev:60,contamAvoid:40,adminRelease:50,resegCorrect:80,errorRecovered:72,penaltyReduction:35,
+       tTask:1150,tReporting:700,tInvoice:560,tAudit:240,tTraining:380,tCustody:60,
+       crewRate:44,adminRate:66,avgSpeed:26,costPerKm:1.10,
+       licence:92000,implementation:34000,co2PerTonne:0.46,co2PerKm:0.95}},
+   edu:{name:"Education",
+    lead:"Education.",
+    body:"Campuses and schools with long distances between pickups. Route consolidation and term-time right-sizing do the heavy lifting; lab and workshop streams add a small but costly hazardous component.",
+    v:{sites:55,tonnage:2000,wasteSpend:640000,collectionsWk:310,kmPerCollection:12,costPerCollection:36,
+       contamCharges:30000,missedPerYr:150,costPerMissed:140,currentDiversion:35,achievableDiversion:60,
+       landfillCost:245,gateFee:110,rebate:42,highShare:3,wrongSeg:15,highCost:1200,generalCost:210,
+       errorRate:2.4,penaltyExposure:12000,
+       rightSizing:14,routeOpt:12,failedPrev:55,contamAvoid:35,adminRelease:50,resegCorrect:75,errorRecovered:70,penaltyReduction:35,
+       tTask:1250,tReporting:820,tInvoice:540,tAudit:300,tTraining:300,tCustody:100,
+       crewRate:45,adminRate:68,avgSpeed:29,costPerKm:1.05,
+       licence:88000,implementation:32000,co2PerTonne:0.46,co2PerKm:0.95}},
+   retail:{name:"Retail & Shopping Centres",
+    lead:"Retail & Shopping Centres.",
+    body:"High-frequency lifts across tenancies, with cardboard as the valuable stream. The wins are compactor right-sizing, cardboard rebate capture, and recharging waste accurately to tenants instead of absorbing it.",
+    v:{sites:26,tonnage:5200,wasteSpend:1650000,collectionsWk:800,kmPerCollection:6,costPerCollection:41,
+       contamCharges:64000,missedPerYr:380,costPerMissed:170,currentDiversion:38,achievableDiversion:62,
+       landfillCost:245,gateFee:100,rebate:55,highShare:0,wrongSeg:0,highCost:1450,generalCost:210,
+       errorRate:3.0,penaltyExposure:20000,
+       rightSizing:17,routeOpt:10,failedPrev:60,contamAvoid:40,adminRelease:50,resegCorrect:80,errorRecovered:72,penaltyReduction:35,
+       tTask:1900,tReporting:1050,tInvoice:900,tAudit:380,tTraining:260,tCustody:110,
+       crewRate:45,adminRate:70,avgSpeed:24,costPerKm:1.15,
+       licence:132000,implementation:44000,co2PerTonne:0.46,co2PerKm:0.95}},
+   constr:{name:"Construction & Property",
+    lead:"Construction & Property.",
+    body:"Skips and bins across active sites. Diversion reporting is contractual, gate fees swing by stream, and a wrongly classified load pays hazardous rates — evidence and classification are worth real money.",
+    v:{sites:18,tonnage:9500,wasteSpend:2450000,collectionsWk:250,kmPerCollection:18,costPerCollection:120,
+       contamCharges:85000,missedPerYr:90,costPerMissed:260,currentDiversion:55,achievableDiversion:78,
+       landfillCost:260,gateFee:95,rebate:30,highShare:6,wrongSeg:20,highCost:950,generalCost:230,
+       errorRate:3.4,penaltyExposure:60000,
+       rightSizing:12,routeOpt:11,failedPrev:50,contamAvoid:35,adminRelease:50,resegCorrect:75,errorRecovered:70,penaltyReduction:40,
+       tTask:1400,tReporting:980,tInvoice:760,tAudit:420,tTraining:340,tCustody:240,
+       crewRate:52,adminRate:75,avgSpeed:32,costPerKm:1.25,
+       licence:105000,implementation:40000,co2PerTonne:0.46,co2PerKm:0.95}}
+  };
 
-function buildPanels(){
-  $("panels").innerHTML = PANELS.map(p=>`
-    <details class="panel" ${p.open?"open":""}>
-      <summary><span class="pdot"></span>${p.title}<span class="caret">▾</span></summary>
-      <div class="panel-body">
-        ${p.fields.map(f=>`
-          <div class="frow" data-row="${f.k}">
-            <div class="fl"><div class="t">${f.t}</div>${f.d?`<div class="d">${f.d}</div>`:""}</div>
-            <div class="fi">
-              ${f.pre?`<span class="fix cursym">${sym()}</span>`:""}
-              <input type="number" inputmode="decimal" id="in_${f.k}" step="${f.step||"any"}">
-              ${f.suf?`<span class="fix">${f.suf}</span>`:""}
-            </div>
-          </div>`).join("")}
-      </div>
-    </details>`).join("");
+  state = {
+    sector: "fm",
+    currency: "AUD",
+    client: "",
+    v: {...Component.SECTORS.fm.v},
+    raw: {},
+    open: {scale:true, costs:true, levers:false, time:false, rates:false, invest:false},
+    toast: "",
+    toastOn: false
+  };
 
-  ALL_FIELDS.forEach(f=>{
-    $("in_"+f.k).addEventListener("input", e=>{
-      const n = parseFloat(e.target.value);
-      state.v[f.k] = isFinite(n)?n:0;
-      render();
-    });
-  });
-}
+  nf0 = new Intl.NumberFormat("en-AU",{maximumFractionDigits:0});
+  nf1 = new Intl.NumberFormat("en-AU",{maximumFractionDigits:1,minimumFractionDigits:1});
 
-function fillInputs(){
-  ALL_FIELDS.forEach(f=>{
-    const el = $("in_"+f.k), val = state.v[f.k];
-    el.value = (Math.abs(val)>=1000) ? Math.round(val) : Math.round(val*100)/100;
-  });
-  document.querySelectorAll(".cursym").forEach(el=>el.textContent=sym());
-}
+  get allFields(){ return Component.PANELS.flatMap(p=>p.fields); }
+  get monetary(){ return new Set(this.allFields.filter(f=>f.m).map(f=>f.k)); }
+  sym(){ return Component.CURRENCIES[this.state.currency].sym; }
 
-function render(){
-  const r = compute();
-
-  $("bigTotal").textContent = compact(r.total);
-  $("bigSub").textContent = `${money(r.total)} per year · ${money(state.v.sites>0?r.total/state.v.sites:0)} per site · ${sym()}${nf1.format(state.v.tonnage>0?r.total/state.v.tonnage:0)} per tonne managed`;
-
-  $("kNet1").textContent = compact(r.y1net);
-  $("kRoi1").textContent = r.y1roi==null?"—":Math.round(r.y1roi*100)+"%";
-  $("kRoi3s").textContent = "3-year ROI "+(r.roi3==null?"—":Math.round(r.roi3*100)+"%");
-  $("kPayback").textContent = r.payback==null?"—":(r.payback>=24?"24+ mo":nf1.format(r.payback)+" mo");
-  $("kNet3").textContent = compact(r.n3);
-  $("kCo2s").textContent = nf0.format(Math.round(r.co2))+" tCO₂e avoided per year";
-
-  const max = Math.max(1,...r.groups.flatMap(g=>g.rows.filter(x=>!x.na).map(x=>x.val)));
-  $("drivers").innerHTML = r.groups.map(g=>`
-    <div class="grp">
-      <div class="grp-head"><span class="gname">${g.name}</span><span class="gtotal">${money(g.total)}</span></div>
-      ${g.rows.map(row=>`
-        <div class="row">
-          <div class="lab"><div class="t">${row.t}</div><div class="u">${row.na?"":row.u}</div></div>
-          <div class="barcell">${row.na
-            ? `<span class="na">not applicable to this sector</span>`
-            : `<div class="bar" style="width:${Math.max(1.2,row.val/max*72)}%;background:${g.color}"></div><span class="bval">${money(row.val)}</span>`}
-          </div>
-        </div>`).join("")}
-    </div>`).join("");
-
-  // dim dependent inputs
-  const dimmed = (state.v.highShare||0)<=0;
-  document.querySelectorAll("[data-row]").forEach(el=>{
-    const f = ALL_FIELDS.find(x=>x.k===el.dataset.row);
-    el.classList.toggle("dim", !!(f&&f.dimIf&&dimmed));
-  });
-
-  $("sectorNote").innerHTML = SECTORS[state.sector].blurb;
-}
-
-/* ═══════════════ Actions ═══════════════ */
-
-function applySector(key, keepValues){
-  state.sector = key;
-  if(!keepValues){
-    const rate = CURRENCIES[state.currency].rate;
-    state.v = {...SECTORS[key].v};
-    MONETARY.forEach(k=>{ state.v[k] = state.v[k]*rate; });
+  money(v){ return this.sym()+this.nf0.format(Math.round(v)); }
+  compact(v){
+    const a=Math.abs(v), s=v<0?"−":"";
+    if(a>=995000) return s+this.sym()+((a/1e6)>=10 ? this.nf0.format(a/1e6) : (Math.round(a/1e4)/100).toFixed(2).replace(/0$/,""))+"M";
+    if(a>=1000) return s+this.sym()+this.nf0.format(Math.round(a/1000))+"K";
+    return s+this.sym()+this.nf0.format(a);
   }
-  $("sectorSel").value = key;
-  fillInputs(); render();
+  rawFor(val){ return String(Math.abs(val)>=1000 ? Math.round(val) : Math.round(val*100)/100); }
+  rawAll(v){ const r={}; this.allFields.forEach(f=>{ r[f.k]=this.rawFor(v[f.k]||0); }); return r; }
+
+  componentDidMount(){
+    const hash = location.hash.slice(1);
+    if(hash.length>1){
+      try{
+        const o = JSON.parse(decodeURIComponent(escape(atob(hash.replace(/-/g,"+").replace(/_/g,"/")))));
+        if(o && Component.SECTORS[o.s] && Component.CURRENCIES[o.c]){
+          const v = {...Component.SECTORS[o.s].v, ...o.v};
+          this.setState({sector:o.s, currency:o.c, client:o.n||"", v, raw:this.rawAll(v)});
+          if(this.clientEl) this.clientEl.textContent = o.n||"";
+          return;
+        }
+      }catch(e){}
+    }
+    this.setState({raw:this.rawAll(this.state.v)});
+  }
+
+  compute(){
+    const v = this.state.v, pct = x => (v[x]||0)/100, nf0 = this.nf0, nf1 = this.nf1;
+
+    const collectionsYr = (v.collectionsWk||0)*52;
+    const liftsRemoved  = collectionsYr*pct("rightSizing");
+    const saveLifts     = liftsRemoved*(v.costPerCollection||0);
+    const remaining     = collectionsYr-liftsRemoved;
+    const kmRemoved     = remaining*(v.kmPerCollection||0)*pct("routeOpt");
+    const saveKm        = kmRemoved*(v.costPerKm||0);
+    const crewHours     = (v.avgSpeed||0)>0 ? kmRemoved/v.avgSpeed : 0;
+    const saveCrew      = crewHours*(v.crewRate||0);
+    const prevented     = (v.missedPerYr||0)*pct("failedPrev");
+    const saveFailed    = prevented*(v.costPerMissed||0);
+    const fleet         = saveLifts+saveCrew+saveKm+saveFailed;
+
+    const rel = h => (h||0)*pct("adminRelease");
+    const adminRows = [
+      ["Task & service management", rel(v.tTask)],
+      ["Reporting & data compilation", rel(v.tReporting)],
+      ["Invoice checking time", rel(v.tInvoice)],
+      ["Audit preparation", rel(v.tAudit)],
+      ["Training & onboarding", rel(v.tTraining)],
+      ["Chain-of-custody paperwork", rel(v.tCustody)]
+    ].map(([t,h])=>({t, h, val:h*(v.adminRate||0)}));
+    const admin = adminRows.reduce((s,r)=>s+r.val,0);
+
+    const uplift  = Math.max(0, pct("achievableDiversion")-pct("currentDiversion"));
+    const tDiv    = uplift*(v.tonnage||0);
+    const saveDiv = tDiv*((v.landfillCost||0)-(v.gateFee||0));
+    const saveReb = tDiv*(v.rebate||0);
+    const saveCon = (v.contamCharges||0)*pct("contamAvoid");
+    const tWrong  = (v.tonnage||0)*pct("highShare")*pct("wrongSeg");
+    const tReseg  = tWrong*pct("resegCorrect");
+    const saveSeg = tReseg*Math.max(0,(v.highCost||0)-(v.generalCost||0));
+    const segNA   = pct("highShare")<=0 || pct("wrongSeg")<=0;
+    const materials = saveDiv+saveReb+saveCon+(segNA?0:saveSeg);
+
+    const saveBill = (v.wasteSpend||0)*pct("errorRate")*pct("errorRecovered");
+    const savePen  = (v.penaltyExposure||0)*pct("penaltyReduction");
+    const risk     = saveBill+savePen;
+
+    const total = fleet+admin+materials+risk;
+    const y1cost = (v.licence||0)+(v.implementation||0);
+    const y1net  = total-y1cost;
+    const y1roi  = y1cost>0 ? y1net/y1cost : null;
+    const payback= total>0 ? y1cost/(total/12) : null;
+    const c3     = (v.implementation||0)+3*(v.licence||0);
+    const n3     = 3*total-c3;
+    const roi3   = c3>0 ? n3/c3 : null;
+    const co2    = tDiv*(v.co2PerTonne||0) + kmRemoved*(v.co2PerKm||0)/1000;
+
+    return {
+      total, y1cost, y1net, y1roi, payback, n3, roi3, co2,
+      groups:[
+        {name:"Fleet & routes", color:"#43B02A", total:fleet, rows:[
+          {t:"Collections avoided", u:nf0.format(Math.round(liftsRemoved))+" lifts/yr removed", val:saveLifts},
+          {t:"Crew hours on route", u:nf0.format(Math.round(crewHours))+" hr/yr released", val:saveCrew},
+          {t:"Mileage & fuel", u:nf0.format(Math.round(kmRemoved))+" km/yr removed", val:saveKm},
+          {t:"Failed collection callouts", u:nf0.format(Math.round(prevented))+" prevented/yr", val:saveFailed}
+        ]},
+        {name:"Admin & time released", color:"#F19E21", total:admin,
+          rows:adminRows.map(r=>({t:r.t, u:nf0.format(Math.round(r.h))+" hr/yr released", val:r.val}))},
+        {name:"Materials & disposal", color:"#205C40", total:materials, rows:[
+          {t:"Landfill diversion", u:nf0.format(Math.round(tDiv))+" t/yr moved off landfill", val:saveDiv},
+          {t:"Recyclate rebate captured", u:"on "+nf0.format(Math.round(tDiv))+" t/yr", val:saveReb},
+          {t:"Contamination charges", u:nf0.format(v.contamAvoid||0)+"% of current charges avoided", val:saveCon},
+          {t:"Stream re-segregation", u:nf0.format(Math.round(tReseg))+" t/yr out of the costly stream", val:saveSeg, na:segNA}
+        ]},
+        {name:"Risk & compliance", color:"#A87E4B", total:risk, rows:[
+          {t:"Billing errors recovered", u:nf1.format(v.errorRate||0)+"% error rate, "+nf0.format(v.errorRecovered||0)+"% recovered", val:saveBill},
+          {t:"Penalty exposure reduced", u:"probability-weighted", val:savePen}
+        ]}
+      ]
+    };
+  }
+
+  applySector(key){
+    const rate = Component.CURRENCIES[this.state.currency].rate;
+    const v = {...Component.SECTORS[key].v};
+    this.monetary.forEach(k=>{ v[k] = v[k]*rate; });
+    this.setState({sector:key, v, raw:this.rawAll(v)});
+  }
+
+  applyCurrency(nc){
+    const old = Component.CURRENCIES[this.state.currency].rate, nw = Component.CURRENCIES[nc].rate;
+    const v = {...this.state.v};
+    this.monetary.forEach(k=>{ v[k] = v[k]/old*nw; });
+    this.setState({currency:nc, v, raw:this.rawAll(v)});
+  }
+
+  encodeState(){
+    const s = this.state;
+    const json = JSON.stringify({s:s.sector,c:s.currency,n:s.client,v:s.v});
+    return btoa(unescape(encodeURIComponent(json))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+
+  showToast(msg){
+    this.setState({toast:msg, toastOn:true});
+    clearTimeout(this._tt);
+    this._tt = setTimeout(()=>this.setState({toastOn:false}), 2600);
+  }
+
+  renderVals(){
+    const S = Component.SECTORS, C = Component.CURRENCIES, st = this.state;
+    const r = this.compute();
+    const sec = S[st.sector];
+    const dimmed = (st.v.highShare||0)<=0;
+    const max = Math.max(1, ...r.groups.flatMap(g=>g.rows.filter(x=>!x.na).map(x=>x.val)));
+
+    return {
+      sector: st.sector,
+      currency: st.currency,
+      sectorOptions: Object.entries(S).map(([k,s])=>({k, name:s.name})),
+      currencyOptions: Object.entries(C).map(([k,c])=>({k, label:c.label})),
+      sectorLead: sec.lead,
+      sectorBody: sec.body,
+      clientRef: el => { this.clientEl = el; },
+      clientPlaceholder: st.client ? "" : "ADD CLIENT NAME",
+      onClientInput: e => {
+        const t = e.target.textContent.trim();
+        const was = this.state.client;
+        this.state.client = t;
+        if(!was !== !t) this.forceUpdate();
+      },
+      onSector: e => this.applySector(e.target.value),
+      onCurrency: e => this.applyCurrency(e.target.value),
+      onPrint: () => window.print(),
+      onReset: () => { this.applySector(st.sector); this.showToast("Reset to the "+sec.name+" benchmark"); },
+      onShare: () => {
+        const url = location.href.split("#")[0]+"#"+this.encodeState();
+        history.replaceState(null,"","#"+this.encodeState());
+        const done = ()=>this.showToast("Link copied — send it to open this exact scenario");
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(url).then(done, ()=>prompt("Copy this link:",url));
+        } else { prompt("Copy this link:",url); }
+      },
+
+      bigTotal: this.compact(r.total),
+      bigSub: `${this.money(r.total)} per year · ${this.money(st.v.sites>0?r.total/st.v.sites:0)} per site · ${this.sym()}${this.nf1.format(st.v.tonnage>0?r.total/st.v.tonnage:0)} per tonne managed`,
+      kNet1: this.compact(r.y1net),
+      kRoi1: r.y1roi==null?"—":Math.round(r.y1roi*100)+"%",
+      kRoi3s: "3-year ROI "+(r.roi3==null?"—":Math.round(r.roi3*100)+"%"),
+      kPayback: r.payback==null?"—":(r.payback>=24?"24+ mo":this.nf1.format(r.payback)+" mo"),
+      kNet3: this.compact(r.n3),
+      kCo2s: this.nf0.format(Math.round(r.co2))+" tCO₂e avoided per year",
+
+      groups: r.groups.map(g=>({
+        name: g.name,
+        total: this.money(g.total),
+        rows: g.rows.map(row=>({
+          t: row.t,
+          u: row.na ? "not applicable to this sector" : row.u,
+          w: row.na ? "0px" : Math.max(1.2, row.val/max*72)+"%",
+          color: g.color,
+          val: row.na ? "n/a" : this.money(row.val),
+          valColor: row.na ? "#7A8189" : "#0E1A1F"
+        }))
+      })),
+
+      panels: Component.PANELS.map(p=>({
+        title: p.title,
+        dot: p.dot,
+        open: !!st.open[p.id],
+        caret: st.open[p.id] ? "rotate(180deg)" : "rotate(0deg)",
+        onToggle: () => this.setState(s=>({open:{...s.open, [p.id]:!s.open[p.id]}})),
+        fields: p.fields.map(f=>{
+          const dim = !!(f.dimIf && dimmed);
+          return {
+            t: f.t,
+            d: f.d || "",
+            pre: f.pre ? this.sym() : "",
+            suf: f.suf || "",
+            step: f.step || "any",
+            val: st.raw[f.k] ?? "",
+            op: dim ? "0.4" : "1",
+            pe: dim ? "none" : "auto",
+            onInput: e => {
+              const txt = e.target.value, n = parseFloat(txt);
+              this.setState(s=>({
+                raw: {...s.raw, [f.k]: txt},
+                v: {...s.v, [f.k]: isFinite(n)?n:0}
+              }));
+            }
+          };
+        })
+      })),
+
+      toastMsg: st.toast,
+      toastOp: st.toastOn ? "1" : "0",
+      toastT: st.toastOn ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(20px)"
+    };
+  }
 }
 
-function applyCurrency(newCur){
-  const old = CURRENCIES[state.currency].rate, nw = CURRENCIES[newCur].rate;
-  MONETARY.forEach(k=>{ state.v[k] = state.v[k]/old*nw; });
-  state.currency = newCur;
-  $("currencySel").value = newCur;
-  fillInputs(); render();
-}
-
-function encodeState(){
-  const json = JSON.stringify({s:state.sector,c:state.currency,n:state.client,v:state.v});
-  return btoa(unescape(encodeURIComponent(json))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-}
-function decodeState(hash){
-  try{
-    const json = decodeURIComponent(escape(atob(hash.replace(/-/g,"+").replace(/_/g,"/"))));
-    const o = JSON.parse(json);
-    if(!o||!SECTORS[o.s]||!CURRENCIES[o.c]) return false;
-    state.sector=o.s; state.currency=o.c; state.client=o.n||"";
-    state.v={...SECTORS[o.s].v, ...o.v};
-    return true;
-  }catch(e){ return false; }
-}
-
-let toastTimer;
-function toast(msg){
-  const t=$("toast"); t.textContent=msg; t.classList.add("show");
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
-}
-
-/* ═══════════════ Wire up ═══════════════ */
-
-buildControls();
-buildPanels();
-
-$("sectorSel").addEventListener("change", e=>applySector(e.target.value,false));
-$("currencySel").addEventListener("change", e=>applyCurrency(e.target.value));
-$("btnReset").addEventListener("click", ()=>{ applySector(state.sector,false); toast("Reset to the "+SECTORS[state.sector].name+" benchmark"); });
-$("btnPrint").addEventListener("click", ()=>window.print());
-$("btnShare").addEventListener("click", ()=>{
-  const url = location.href.split("#")[0]+"#"+encodeState();
-  history.replaceState(null,"", "#"+encodeState());
-  const done = ()=>toast("Link copied — send it to open this exact scenario");
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(done, ()=>prompt("Copy this link:",url));
-  } else { prompt("Copy this link:",url); }
-});
-
-const cn = $("clientName");
-cn.addEventListener("input", ()=>{ state.client = cn.textContent.trim(); });
-cn.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); cn.blur(); } });
-
-// Load from share link if present
-if(location.hash.length>1 && decodeState(location.hash.slice(1))){
-  $("sectorSel").value=state.sector;
-  $("currencySel").value=state.currency;
-  cn.textContent=state.client;
-  fillInputs(); render();
-} else {
-  applySector("fm", false);
-}
 </script>
 </body>
 </html>

@@ -1,0 +1,9 @@
+/* =============================================================
+ * Matter Design System — root entrypoint
+ * Consumers link THIS file. It pulls in the shared foundation
+ * (color, type, spacing, radius, shadow, motion tokens + base
+ * type styles). The per-kit dashboards under ui_kits/* link
+ * their own demo styles on top of these tokens.
+ * ============================================================= */
+
+@import url('./colors_and_type.css');
